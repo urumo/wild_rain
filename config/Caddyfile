@@ -1,0 +1,28 @@
+(common) {
+	header /* {
+		-Server
+	}
+}
+
+:80 {
+	@notApi {
+		not path /api
+	}
+	log {
+		output stdout
+	}
+	handle_path /api* {
+		reverse_proxy {
+			to unix//etc/caddy/shared/sockets/puma.sock
+			transport http {
+				read_buffer 8192
+			}
+		}
+	}
+
+	handle {
+		root * /var/www/public
+		file_server
+	}
+	import common
+}

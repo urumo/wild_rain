@@ -1,0 +1,118 @@
+version: '3.9'
+
+x-rails-env: &rails-env
+  RAILS_ENV: development
+  REDIS_URL: redis://redis:6380
+  DATABASE_URL: postgres://postgres:postgres@db:5432/wild_rain_development
+  RAILS_LOG_TO_STDOUT: 1
+
+services:
+  proxy:
+    image: caddy:2-alpine
+    restart: unless-stopped
+    depends_on:
+      - rails
+    ports:
+      - "80:80"
+      - "2019:2019"
+    #      - "443:443"
+    volumes:
+      - './config/Caddyfile:/etc/caddy/Caddyfile'
+      - 'caddy_data:/data'
+      - 'caddy_config:/config'
+      - 'server_shared:/etc/caddy/shared'
+      - 'public:/var/www/public'
+
+  rails:
+    #    deploy:
+    #      resources:
+    #        limits:
+    #          cpus: '8'
+    #          memory: 1024m
+    image: api_rails
+    tty: true
+    stdin_open: true
+    build:
+      context: .
+      dockerfile: Dockerfile
+    volumes:
+      - '.:/app'
+      - 'public:/app/public'
+      - 'server_shared:/app/shared/'
+    ports:
+      - '3000:3000'
+    depends_on:
+      - sidekiq
+    environment:
+      <<: *rails-env
+      SIDEKIQ_USER: admin
+      SIDEKIQ_PASSWORD: admin
+      PORT: 3000
+    command: >
+      sh -c "rm -rf /app/tmp/pids/server.pid &&
+             bundle exec puma -C ./config/puma.rb"
+  runner:
+    image: api_rails
+    tty: true
+    stdin_open: true
+    environment:
+      <<: *rails-env
+    command: bash
+    volumes:
+      - '.:/app'
+    depends_on:
+      - redis
+      - db
+
+  migrate:
+    image: api_rails
+    environment:
+      <<: *rails-env
+    command: "bundle exec rails db:create && bundle exec rails db:migrate db:seed"
+    volumes:
+      - '.:/app'
+    depends_on:
+      - runner
+
+  sidekiq:
+    image: api_rails
+    command: bundle exec sidekiq
+    volumes:
+      - '.:/app'
+    depends_on:
+      - runner
+    environment:
+      <<: *rails-env
+
+  redis:
+    image: redis:alpine
+    command:
+      - 'redis-server'
+      - '--port 6380'
+    ports:
+      - "6380:6380"
+
+  db:
+    image: postgres:alpine
+    restart: unless-stopped
+    environment:
+      - 'POSTGRES_USER=postgres'
+      - 'POSTGRES_PASSWORD=postgres'
+    ports:
+      - '5432:5432'
+    volumes:
+      - 'db:/var/lib/postgresql/data'
+
+  adminer:
+    image: adminer
+    restart: unless-stopped
+    ports:
+      - '8080:8080'
+
+
+volumes:
+  server_shared:
+  caddy_data:
+  public:
+  caddy_config:
+  db:
