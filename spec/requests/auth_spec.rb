@@ -5,14 +5,14 @@ require 'rails_helper'
 RSpec.describe 'Auths', type: :request do
   describe 'GET /sign_in' do
     it 'returns http success' do
-      get '/auth/sign_in'
+      post '/auth/sign_in'
       expect(response).to have_http_status(:success)
     end
   end
 
   describe 'GET /sign_up' do
     it 'returns http success' do
-      get '/auth/sign_up'
+      post '/auth/sign_up'
       expect(response).to have_http_status(:success)
     end
   end
