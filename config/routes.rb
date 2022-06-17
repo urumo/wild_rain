@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 Rails.application.routes.draw do
+  get 'user_wallet/available'
   get 'health_check/status'
   post 'auth/sign_in', to: 'auth#sign_in'
   post 'auth/sign_up', to: 'auth#sign_up'
