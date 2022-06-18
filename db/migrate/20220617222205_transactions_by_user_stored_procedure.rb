@@ -62,8 +62,8 @@ class TransactionsByUserStoredProcedure < ActiveRecord::Migration[7.0]
                       tt := 'receiver';
                   else
                       cu_had := tr.sender_had;
-                      cu_has := tr.sender_had;
-                      ou_had := tr.receiver_has;
+                      cu_has := tr.sender_has;
+                      ou_had := tr.receiver_had;
                       ou_has := tr.receiver_has;
                       tt := 'sender';
                   end if;

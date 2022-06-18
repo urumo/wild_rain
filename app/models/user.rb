@@ -15,8 +15,18 @@ class User < ApplicationRecord
     UserWallet.create(available: 0.0, user: self)
   end
 
-  def transactions(start_time = Time.now.beginning_of_month, to_time = Time.now)
-    User.transactions(id, start_time, to_time).map { |tr| TransactionByUser.new(*tr.values) }
+  def transactions(dates)
+    start_time = dates[:start_time] || Time.now.beginning_of_month
+    to_time = dates[:to_time] || Time.now
+    start_time = to_time.beginning_of_month if to_time < start_time
+
+    trs = User.transactions(id, start_time, to_time).map { |tr| TransactionByUser.new(*tr.values) }
+
+    {
+      had: trs.first&.current_user_had,
+      has: trs.last&.current_user_has,
+      transactions: trs
+    }
   end
 
   def self.transactions(user_id, start_time, to_time)
@@ -24,10 +34,5 @@ class User < ApplicationRecord
       'select * from transactions_by_user(?, ?, ?)',
       user_id, start_time, to_time
     )
-    # connection.select_all('transactions_by_user(?, ?, ?)', [user_id, start_time, to_time])
-    # Transaction.where(
-    #   '(sender_id = ? or receiver_id = ?) and (created_at > ? and created_at < ?)',
-    #   id, id, start_time, to_time
-    # )
   end
 end
