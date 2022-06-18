@@ -1,8 +1,8 @@
 # frozen_string_literal: true
 
-require 'rails_helper'
+require 'swagger_helper'
 
-RSpec.describe 'UserWallets', type: :request do
+RSpec.describe 'user_wallet', type: :request do
   before :each do
     @user = create :user
     @user2 = create :user, email: 'temp@email.com'
@@ -35,6 +35,45 @@ RSpec.describe 'UserWallets', type: :request do
       expect(body[:result][:transactions].count).to be 1
       expect(body[:result][:had].to_f).to be 50.0
       expect(body[:result][:has].to_f).to be 40.0
+    end
+  end
+  path '/user_wallet/available' do
+    get('available user_wallet') do
+      security [api_key: '']
+      produces 'application/json'
+
+      response(200, 'successful') do
+        schema type: :object,
+               properties: {
+                 available: { type: :string }
+               }
+        run_test!
+      end
+      response(401, 'unauthorized') do
+        schema type: :object,
+               properties: {
+                 message: { type: :string }
+               }
+        run_test!
+      end
+    end
+  end
+
+  path '/user_wallet/transactions' do
+    get('transactions user_wallet') do
+      security [api_key: '']
+      produces 'application/json'
+      response(200, 'successful') do
+        schema '$ref' => '#/components/schemas/transactions'
+        run_test!
+      end
+      response(401, 'unauthorized') do
+        schema type: :object,
+               properties: {
+                 message: { type: :string }
+               }
+        run_test!
+      end
     end
   end
 end

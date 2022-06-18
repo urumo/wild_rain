@@ -16,6 +16,47 @@ RSpec.configure do |config|
   # the root example_group in your specs, e.g. describe '...', swagger_doc: 'v2/swagger.json'
   config.swagger_docs = {
     'v1/swagger.yaml' => {
+      components: {
+        securitySchemes: {
+          api_key: {
+            type: :apiKey,
+            name: 'Authorization',
+            in: :header
+          }
+        },
+        schemas: {
+          transactions: {
+            type: :object,
+            properties: {
+              message: { type: :string },
+              result: { '$ref' => '#/components/schemas/result' }
+            }
+          },
+          result: {
+            type: :object,
+            properties: {
+              has: { type: :string },
+              had: { type: :string },
+              transactions: { type: :array, items: { '$ref' => '#/components/schemas/transaction' } }
+            }
+          },
+          transaction: {
+            type: :object,
+            properties: {
+              id: { type: :string },
+              current_user: { type: :string },
+              sender_id: { type: :string },
+              receiver_id: { type: :string },
+              amount: { type: :string },
+              current_user_had: { type: :string },
+              current_user_has: { type: :string },
+              other_user_had: { type: :string },
+              other_user_has: { type: :string },
+              transaction_performed_at: { type: :string }
+            }
+          }
+        }
+      },
       openapi: '3.0.1',
       info: {
         title: 'API V1',
@@ -24,10 +65,10 @@ RSpec.configure do |config|
       paths: {},
       servers: [
         {
-          url: 'https://{defaultHost}',
+          url: 'http://{defaultHost}',
           variables: {
             defaultHost: {
-              default: 'www.example.com'
+              default: '127.0.0.1:3000'
             }
           }
         }

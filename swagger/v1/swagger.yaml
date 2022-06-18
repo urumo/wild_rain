@@ -1,11 +1,200 @@
 ---
+components:
+  securitySchemes:
+    api_key:
+      type: apiKey
+      name: Authorization
+      in: header
+  schemas:
+    transactions:
+      type: object
+      properties:
+        message:
+          type: string
+        result:
+          "$ref": "#/components/schemas/result"
+    result:
+      type: object
+      properties:
+        has:
+          type: string
+        had:
+          type: string
+        transactions:
+          type: array
+          items:
+            "$ref": "#/components/schemas/transaction"
+    transaction:
+      type: object
+      properties:
+        id:
+          type: string
+        current_user:
+          type: string
+        sender_id:
+          type: string
+        receiver_id:
+          type: string
+        amount:
+          type: string
+        current_user_had:
+          type: string
+        current_user_has:
+          type: string
+        other_user_had:
+          type: string
+        other_user_has:
+          type: string
+        transaction_performed_at:
+          type: string
 openapi: 3.0.1
 info:
   title: API V1
   version: v1
-paths: {}
+paths:
+  "/auth/sign_up":
+    post:
+      summary: sign_up auth
+      parameters: []
+      responses:
+        '200':
+          description: success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+        '422':
+          description: unprocessable entity
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: object
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                password:
+                  type: string
+              required:
+              - email
+              - password
+  "/auth/sign_in":
+    post:
+      summary: sign_in auth
+      parameters: []
+      responses:
+        '200':
+          description: success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  user_id:
+                    type: string
+        '404':
+          description: not found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+        '400':
+          description: bad request
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                password:
+                  type: string
+              required:
+              - email
+              - password
+  "/health_check/status":
+    get:
+      summary: status health_check
+      responses:
+        '200':
+          description: success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  is_up:
+                    type: string
+  "/user_wallet/available":
+    get:
+      summary: available user_wallet
+      security:
+      - api_key: ''
+      responses:
+        '200':
+          description: successful
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  available:
+                    type: string
+        '401':
+          description: unauthorized
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+  "/user_wallet/transactions":
+    get:
+      summary: transactions user_wallet
+      security:
+      - api_key: ''
+      responses:
+        '200':
+          description: successful
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/transactions"
+        '401':
+          description: unauthorized
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
 servers:
-- url: https://{defaultHost}
+- url: http://{defaultHost}
   variables:
     defaultHost:
-      default: www.example.com
+      default: 127.0.0.1:3000

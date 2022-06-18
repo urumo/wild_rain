@@ -4,7 +4,9 @@ class UserWalletController < ApplicationController
   before_action :authenticate
 
   def available
-    render json: { available: current_wallet.available }
+    render json: { available: current_wallet&.available }
+  rescue StandardError
+    render json: { message: 'something went wrong' }
   end
 
   def transactions
@@ -31,5 +33,5 @@ class UserWalletController < ApplicationController
 
   private
 
-  def current_wallet = @current_user.wallet
+  def current_wallet = @current_user&.wallet
 end
