@@ -1,24 +1,22 @@
-# README
+# Задача
+* Реализовать JSON API по учету доходов и расходов пользователя с учетом приведенных ниже требований к реализации:
+Конкурентные запросы по изменению баланса пользователя
+Выписка по всем операциям пользователя с отбором по периоду (Наименование дохода (расхода), сумма, дата), состояние баланса на начало и конец периода.
 
-This README would normally document whatever steps are necessary to get the
-application up and running.
-
-Things you may want to cover:
-
-* Ruby version
-
-* System dependencies
-
-* Configuration
-
-* Database creation
-
-* Database initialization
-
-* How to run the test suite
-
-* Services (job queues, cache servers, search engines, etc.)
-
-* Deployment instructions
-
-* ...
+# Решение
+* В папке миграций последняя миграция это хранимая процедура в базе, которая принимает айди пользователя, даты начала и конца выбронного периода, возвращает массив подобного типа
+```SQL
+(
+          id               uuid,
+          tt               transaction_type,
+          sender_id        uuid,
+          receiver_id      uuid,
+          amount           numeric(32, 8),
+          current_user_had numeric(32, 8),
+          current_user_has numeric(32, 8),
+          other_user_had   numeric(32, 8),
+          other_user_has   numeric(32, 8),
+          created_at       timestamp(6)
+)
+```
+* Дальше данное решение используется в контроллере `UserWallet` в действии `transactions`
